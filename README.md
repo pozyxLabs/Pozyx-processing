@@ -11,5 +11,7 @@ Check out http://www.gwoptics.org/processing/gwoptics_p5lib/ for more info on th
 -  [Orientation 3D] : shows the 3D orientation of the Pozyx device by reading the sensor values from the serial port.
 
 
+![alt text](https://www.pozyx.io/assets/images/docs/tutorials/remote_imu_processing.png "Orientation 3D")
+
 
 [Orientation 3D]: https://www.pozyx.io/Documentation/Tutorials/orientation_3D
