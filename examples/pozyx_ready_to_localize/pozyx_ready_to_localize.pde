@@ -8,6 +8,7 @@ import java.lang.Math.*;
 
 
 String portName = "COM30";      // change this to your COM port 
+int NUM_ANCHORS = 4;
 
 /////////////////////////////////////////////////////////////
 //////////////////////  variables //////////////////////////
@@ -15,12 +16,10 @@ String portName = "COM30";      // change this to your COM port
 
 Graph2D g_range, g_rss;
 Graph2D map;
-
 Serial  myPort;
-short   portIndex = 2;
 int     lf = 10;       //ASCII linefeed
 String  inString;      //String for testing serial communication
-int NUM_ANCHORS = 4;
+
 // ANCHOR COLORS
 int[] rgb_color = {0, 0, 255, 0, 160, 122, 0, 255, 0, 255};
 
@@ -132,12 +131,13 @@ void setup(){
       println("Cannot open serial port.");
     }
     
-    
-     // initialize running traces 
-    g_range = new Graph2D(this, 500, 300, false);
-    g_rss = new Graph2D(this, 500, 150, false);
-    
+    // initialize the 2D map
+    position_data = new positionDataHistory();
     map = new Graph2D(this, 800, 600, false);
+    
+     // initialize running traces with range and RSS information
+    g_range = new Graph2D(this, 500, 300, false);
+    g_rss = new Graph2D(this, 500, 150, false); 
     
     range_data = new ArrayList<rangeData>();
     rss_data = new ArrayList<rangeData>();    
@@ -169,7 +169,7 @@ void setup(){
     g_range.setYAxisLabel("distance (m)");
     g_range.setBackground(new SolidColourBackground(new GWColour(0f,0f,0f)));
     
-    // initialize the graph displaying the received signal strength
+    // initialize the graph displaying the received signal strength (RSS)
     g_rss.setYAxisMin(-120.0f);
     g_rss.setYAxisMax(-50.0f);
     g_rss.position.y = 480;
@@ -178,9 +178,7 @@ void setup(){
     g_rss.setXAxisMax(5f);
     g_rss.setXAxisLabel("time (s)");
     g_rss.setYAxisLabel("RSS (dBm)");
-    g_rss.setBackground(new SolidColourBackground(new GWColour(0f,0f,0f)));
-    
-    position_data = new positionDataHistory();
+    g_rss.setBackground(new SolidColourBackground(new GWColour(0f,0f,0f)));    
 }
 
 void draw(){
@@ -203,20 +201,23 @@ void drawRange(){
   fill(0);                        
   text("Range measurements",20,30);  
   
-  // we add some additional textual information about the ranges
+  
+  // we add some additional textual information about the ranges: mean distance and the standard deviation.
   fill(0); 
   strokeWeight(2);
-  for(int i=0; i<4; i++){
-    
-      pushMatrix();
-      translate(50,380);
+  pushMatrix();
+  translate(50,380);
+  
+  text("Press [space] to reset the signal statistics",240, 6);
+  
+  for(int i=0; i<4; i++)
+  {
       stroke(rgb_color[i%10], rgb_color[(i+1)%10], rgb_color[(i+2)%10]);
-      
-      line(0, 0+6+i*18, 10, 0+6+i*18);
-      text("Average: "+ String.format("%.3f", range_data.get(i).get_range_avg()) + "m", 20, 0+12+i*18);
-      text("Std. dev.: "+ String.format("%.3f", range_data.get(i).get_range_std()) + "m", 140, 0+12+i*18);
-      popMatrix();
-  }  
+      line(0, 6+i*18, 10, 6+i*18);
+      text("Average: "+ String.format("%.3f", range_data.get(i).get_range_avg()) + "m", 20, 12+i*18);
+      text("Std. dev.: "+ String.format("%.3f", range_data.get(i).get_range_std()) + "m", 140, 12+i*18);   
+  }
+  popMatrix();
   
 }
   
@@ -360,4 +361,13 @@ inString = (myPort.readString());
       println("Error while reading serial data.");
   }
   
+}
+
+void keyPressed() {
+  
+  // reset the mean and standard deviation
+  for(int i = 0; i < NUM_ANCHORS; i++){
+        range_data.get(i).reset_statistics();        
+  }
+  println("Resetting statistics.");  
 }
