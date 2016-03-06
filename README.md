@@ -13,6 +13,7 @@ Check out http://www.gwoptics.org/processing/gwoptics_p5lib/ for more info on th
 
 
 ![alt text](https://www.pozyx.io/assets/images/docs/tutorials/remote_imu_processing.png "Orientation 3D")
+![alt text](https://www.pozyx.io/assets/images/docs/tutorials/ready_to_localize.png "Ready to localize")
 
 
 [Orientation 3D]: https://www.pozyx.io/Documentation/Tutorials/orientation_3D
