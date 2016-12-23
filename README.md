@@ -4,8 +4,7 @@ Some files for processing 3.0 that come with the pozyx tutorials
 More information on https://www.pozyx.io
 
 ## Installation instructions
-copy both examples and libraries folder in your Processing sketchbook.
-copy the folder gwoptics to the libraries folder in Processing 3. Under windows this can be found under My documents/Processing
+Copy both examples and libraries folder in your Processing sketchbook. Under windows this can be found under My documents/Processing
 Check out http://www.gwoptics.org/processing/gwoptics_p5lib/ for more info on the gwoptics library
 
 ## Examples
