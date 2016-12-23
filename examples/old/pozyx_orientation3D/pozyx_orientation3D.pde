@@ -1,4 +1,3 @@
-import oscP5.*;
 import org.gwoptics.graphics.graph2D.Graph2D;
 import org.gwoptics.graphics.graph2D.traces.*;
 import org.gwoptics.graphics.graph2D.backgrounds.*;
@@ -6,19 +5,16 @@ import org.gwoptics.graphics.GWColour;
 import processing.serial.*;
 import java.lang.Math.*;
 
-boolean serial = false;          // set to true to use Serial, false to use OSC messages.
 
-int oscPort = 8888;               // change this to your UDP port
-String serialPort = "COM13";      // change this to your COM port 
+
+String portName = "COM30";      // change this to your COM port 
 
 
 /////////////////////////////////////////////////////////////
 //////////////////////  variables //////////////////////////
 /////////////////////////////////////////////////////////////
 
-OscP5 oscP5;
-Serial myPort;
-
+Serial  myPort;
 int     lf = 10;       //ASCII linefeed
 String  inString;      //String for testing serial communication
 int[] rgb_color = {0, 0, 255, 0, 160, 122, 0, 255, 0, 255};
@@ -30,9 +26,9 @@ PImage compass_img;
 ///////////// sensordata variables //////////////////////////
 /////////////////////////////////////////////////////////////
 
-float x_angle = 0;  
-float y_angle = 0;
-float z_angle = 0;
+float   x_angle = 0;  
+float   y_angle = 0;
+float   z_angle = 0;
 
 float speed_x = 0;
 float speed_y = 0;
@@ -78,95 +74,87 @@ class rangeData implements ILine2DEquation{
 
 
 void setup(){
-  size(1100,800, P3D);
-  surface.setResizable(true);
-  stroke(0,0,0);
-  colorMode(RGB, 256); 
-     
-  compass_img = loadImage("compass.png");
- 
-  if(serial){
+    size(1100,800, P3D);
+    surface.setResizable(true);
+    stroke(0,0,0);
+    colorMode(RGB, 256); 
+       
+    compass_img = loadImage("compass.png");
+   
     try{
-      myPort = new Serial(this, serialPort, 115200);
+      myPort = new Serial(this, portName, 115200);
       myPort.clear();
       myPort.bufferUntil(lf);
     }catch(Exception e){
       println("Cannot open serial port.");
     }
-  }else{
-    try{
-      oscP5 = new OscP5(this, oscPort);
-    }catch(Exception e){
-      println("Cannot open UDP port");
+    
+         
+    // initialize running traces 
+    g_acc = new Graph2D(this, 400, 200, false);
+    g_mag = new Graph2D(this, 400, 200, false);
+    g_gyro = new Graph2D(this, 400, 200, false);   
+    
+    accData = new ArrayList<rangeData>();
+    magData = new ArrayList<rangeData>();
+    gyroData = new ArrayList<rangeData>();    
+    for(int i=0; i<3; i++){
+      rangeData r = new rangeData();
+      accData.add(r);
+      RollingLine2DTrace rl = new RollingLine2DTrace(r ,100,0.1f);
+      rl.setTraceColour(rgb_color[i%10], rgb_color[(i+1)%10], rgb_color[(i+2)%10]);
+      rl.setLineWidth(2);      
+      g_acc.addTrace(rl);
+      
+      r = new rangeData();
+      magData.add(r);
+      rl = new RollingLine2DTrace(r ,100,0.1f);
+      rl.setTraceColour(rgb_color[i%10], rgb_color[(i+1)%10], rgb_color[(i+2)%10]);
+      rl.setLineWidth(2);      
+      g_mag.addTrace(rl);
+      
+      r = new rangeData();
+      gyroData.add(r);
+      rl = new RollingLine2DTrace(r ,100,0.1f);
+      rl.setTraceColour(rgb_color[i%10], rgb_color[(i+1)%10], rgb_color[(i+2)%10]);
+      rl.setLineWidth(2);      
+      g_gyro.addTrace(rl);    
+     
     }
-  }
-  
-       
-  // initialize running traces 
-  g_acc = new Graph2D(this, 400, 200, false);
-  g_mag = new Graph2D(this, 400, 200, false);
-  g_gyro = new Graph2D(this, 400, 200, false);   
-  
-  accData = new ArrayList<rangeData>();
-  magData = new ArrayList<rangeData>();
-  gyroData = new ArrayList<rangeData>();    
-  for(int i=0; i<3; i++){
-    rangeData r = new rangeData();
-    accData.add(r);
-    RollingLine2DTrace rl = new RollingLine2DTrace(r ,100,0.1f);
-    rl.setTraceColour(rgb_color[i%10], rgb_color[(i+1)%10], rgb_color[(i+2)%10]);
-    rl.setLineWidth(2);      
-    g_acc.addTrace(rl);
     
-    r = new rangeData();
-    magData.add(r);
-    rl = new RollingLine2DTrace(r ,100,0.1f);
-    rl.setTraceColour(rgb_color[i%10], rgb_color[(i+1)%10], rgb_color[(i+2)%10]);
-    rl.setLineWidth(2);      
-    g_mag.addTrace(rl);
+    // create the accelerometer graph
+    g_acc.setYAxisMin(-2.0f);
+    g_acc.setYAxisMax(2.0f);
+    g_acc.position.y = 50;
+    g_acc.position.x = 100;    
+    g_acc.setYAxisTickSpacing(0.5f);
+    g_acc.setXAxisMax(5f);
+    g_acc.setXAxisLabel("time (s)");
+    g_acc.setYAxisLabel("acceleration [g]");
+    g_acc.setBackground(new SolidColourBackground(new GWColour(1f,1f,1f)));
     
-    r = new rangeData();
-    gyroData.add(r);
-    rl = new RollingLine2DTrace(r ,100,0.1f);
-    rl.setTraceColour(rgb_color[i%10], rgb_color[(i+1)%10], rgb_color[(i+2)%10]);
-    rl.setLineWidth(2);      
-    g_gyro.addTrace(rl);    
-   
-  }
-  
-  // create the accelerometer graph
-  g_acc.setYAxisMin(-2.0f);
-  g_acc.setYAxisMax(2.0f);
-  g_acc.position.y = 50;
-  g_acc.position.x = 100;    
-  g_acc.setYAxisTickSpacing(0.5f);
-  g_acc.setXAxisMax(5f);
-  g_acc.setXAxisLabel("time (s)");
-  g_acc.setYAxisLabel("acceleration [g]");
-  g_acc.setBackground(new SolidColourBackground(new GWColour(1f,1f,1f)));
-  
-  // create the magnetometer graph
-  g_mag.setYAxisMin(-80.0f);
-  g_mag.setYAxisMax(80.0f);
-  g_mag.position.y = 300;
-  g_mag.position.x = 100;    
-  g_mag.setYAxisTickSpacing(40f);
-  g_mag.setXAxisMax(5f);
-  g_mag.setXAxisLabel("time (s)");
-  g_mag.setYAxisLabel("magnetic field strength [µT]");
-  g_mag.setBackground(new SolidColourBackground(new GWColour(1f,1f,1f)));
-  
-  // create the gyrometer graph
-  g_gyro.setYAxisMin(-1000.0f);
-  g_gyro.setYAxisMax(1000.0f);
-  g_gyro.position.y = 550;
-  g_gyro.position.x = 100;    
-  g_gyro.setYAxisTickSpacing(250f);
-  g_gyro.setXAxisMax(5f);
-  g_gyro.setXAxisLabel("time (s)");
-  g_gyro.setYAxisLabel("angular velocity [deg/s]");
-  g_gyro.setBackground(new SolidColourBackground(new GWColour(1f,1f,1f)));
-  
+    // create the magnetometer graph
+    g_mag.setYAxisMin(-80.0f);
+    g_mag.setYAxisMax(80.0f);
+    g_mag.position.y = 300;
+    g_mag.position.x = 100;    
+    g_mag.setYAxisTickSpacing(40f);
+    g_mag.setXAxisMax(5f);
+    g_mag.setXAxisLabel("time (s)");
+    g_mag.setYAxisLabel("magnetic field strength [µT]");
+    g_mag.setBackground(new SolidColourBackground(new GWColour(1f,1f,1f)));
+    
+    // create the gyrometer graph
+    g_gyro.setYAxisMin(-1000.0f);
+    g_gyro.setYAxisMax(1000.0f);
+    g_gyro.position.y = 550;
+    g_gyro.position.x = 100;    
+    g_gyro.setYAxisTickSpacing(250f);
+    g_gyro.setXAxisMax(5f);
+    g_gyro.setXAxisLabel("time (s)");
+    g_gyro.setYAxisLabel("angular velocity [deg/s]");
+    g_gyro.setBackground(new SolidColourBackground(new GWColour(1f,1f,1f)));
+    
 }
 
 void draw(){
@@ -330,68 +318,6 @@ void serialEvent(Serial p) {
       println("Error while reading serial data.");
   }
 }
-
-void oscEvent(OscMessage theOscMessage) {
-  // osc message received
-  println("### received an osc message with addrpattern "+theOscMessage.addrPattern()+" and typetag "+theOscMessage.typetag());
-  if (theOscMessage.addrPattern().equals("/sensordata")){
-    //theOscMessage.print();}
-    try{
-      // the pressure from mPa to Pa is coming in at a slower rate
-      pressure = theOscMessage.get(1).floatValue();
-      
-      // acceleration from mg to g
-      accData.get(0).setCurVal(theOscMessage.get(2).floatValue()/1000.0f);      
-      accData.get(1).setCurVal(theOscMessage.get(3).floatValue()/1000.0f);
-      accData.get(2).setCurVal(theOscMessage.get(4).floatValue()/1000.0f);
-      
-      // magnetometer data in µT
-      magData.get(0).setCurVal(theOscMessage.get(5).floatValue());      
-      magData.get(1).setCurVal(theOscMessage.get(6).floatValue());
-      magData.get(2).setCurVal(theOscMessage.get(7).floatValue());
-      
-      // gyroscope data in degrees per second
-      gyroData.get(0).setCurVal(theOscMessage.get(8).floatValue());      
-      gyroData.get(1).setCurVal(theOscMessage.get(9).floatValue());
-      gyroData.get(2).setCurVal(theOscMessage.get(10).floatValue());
-      
-      // Euler angles in degrees    
-      x_angle = theOscMessage.get(13).floatValue();
-      y_angle = theOscMessage.get(12).floatValue();
-      z_angle = theOscMessage.get(11).floatValue();
-      heading = theOscMessage.get(11).floatValue();
-      
-      // the orientation quaternion
-      quat_w = theOscMessage.get(14).floatValue();
-      quat_x = theOscMessage.get(15).floatValue();
-      quat_y = theOscMessage.get(16).floatValue();
-      quat_z = theOscMessage.get(17).floatValue();
-      float norm = PApplet.sqrt(quat_x * quat_x + quat_y * quat_y + quat_z
-                  * quat_z +quat_w * quat_w);     
-      quat_w = quat_w/norm;
-      quat_x = quat_x/norm;
-      quat_y = quat_y/norm;
-      quat_z = quat_z/norm;  
-      println(norm);
-      
-      // linear acceleration in mg    
-      lin_acc_x = theOscMessage.get(18).floatValue();
-      lin_acc_y = theOscMessage.get(19).floatValue();
-      lin_acc_z = theOscMessage.get(20).floatValue();
-      
-      // gravitation vector from mg to g
-      grav_x = theOscMessage.get(21).floatValue();
-      grav_y = theOscMessage.get(22).floatValue(); 
-      grav_z = theOscMessage.get(23).floatValue();
-      
-      // the calibration status
-      calib_status = "Mag: " + str(theOscMessage.get(24).intValue()) + " - Acc: " + str(theOscMessage.get(25).intValue()) + " - Gyro: " + str(theOscMessage.get(26).intValue()) + " - System: " + str(theOscMessage.get(27).intValue());
-    }catch(Exception e){
-      println("Error while receiving OSC sensor data");
-    }
-  }
-}
-
 
 void draw_rect(int r, int g, int b) {
   scale(100);
