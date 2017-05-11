@@ -138,7 +138,7 @@ void calculateAspectRatio(){
   for (PozyxDevice pozyxDevice : pozyxDevices){
     int[] pos = pozyxDevice.getCurrentPosition();
     max_width_mm = max(max_width_mm, pos[0]);
-    max_height_mm = max(max_height_mm, pos[0]);
+    max_height_mm = max(max_height_mm, pos[1]);
   }
   max_width_mm += 2*border; 
   max_height_mm += 2*border; 
