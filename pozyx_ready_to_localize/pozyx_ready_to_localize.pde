@@ -120,8 +120,8 @@ int oscPort = 8888;                 // set to correct UDP port when using OSC
 // MQTT protocol parameters
 // Find these in the web app Settings (https://bapp.cloud.pozyxlabs.com/settings)
 //  -> API keys
-String TENANT_ID = "5a39662d3a3f2a0005180fd6";
-String API_KEY = "d342fcc5-e050-409e-bce0-1e95e0e4108a";
+String TENANT_ID = "";
+String API_KEY = "";
 
 // GUI settings
 int border = 30;                    // size of the border around the map
@@ -168,7 +168,6 @@ void setup(){
   thread("startCommunication");
   
   surface.setResizable(true);
-  background(51,125,154);
   
   // calculate map dimensions
   map_width = width - 2 * border;
@@ -180,10 +179,7 @@ void setup(){
 
 // Draw function is run continuously
 void draw(){
-  // P2D and P3D renderer need scaling
-  translate(0, 29);
-  scale(1, height/(height+33.0));
-  
+  background(51,125,154);
   fill(0);
   fill(255);
   textSize(14);
