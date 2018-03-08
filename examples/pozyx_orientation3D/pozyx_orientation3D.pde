@@ -319,9 +319,9 @@ void serialEvent(Serial p) {
     lin_acc_z = float(dataStrings[20]);
     
     // gravitation vector from mg to g
-    grav_x = float(dataStrings[21])/1000.0f;
-    grav_y = float(dataStrings[22])/1000.0f; 
-    grav_z = float(dataStrings[23])/1000.0f;
+    grav_x = float(dataStrings[21])/16000.0f;
+    grav_y = float(dataStrings[22])/16000.0f; 
+    grav_z = float(dataStrings[23])/16000.0f;
     
     // the calibration status
     calib_status = "Mag: " + dataStrings[24] + " - Acc: " + dataStrings[25] + " - Gyro: " + dataStrings[26] + " - System: " + dataStrings[27];
@@ -380,9 +380,9 @@ void oscEvent(OscMessage theOscMessage) {
       lin_acc_z = theOscMessage.get(20).floatValue();
       
       // gravitation vector from mg to g
-      grav_x = theOscMessage.get(21).floatValue();
-      grav_y = theOscMessage.get(22).floatValue(); 
-      grav_z = theOscMessage.get(23).floatValue();
+      grav_x = theOscMessage.get(21).floatValue()/1000.0f;
+      grav_y = theOscMessage.get(22).floatValue()/1000.0f; 
+      grav_z = theOscMessage.get(23).floatValue()/1000.0f;
       
       // the calibration status
       calib_status = "Mag: " + str(theOscMessage.get(24).intValue()) + " - Acc: " + str(theOscMessage.get(25).intValue()) + " - Gyro: " + str(theOscMessage.get(26).intValue()) + " - System: " + str(theOscMessage.get(27).intValue());
