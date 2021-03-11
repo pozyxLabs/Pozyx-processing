@@ -1,7 +1,7 @@
 # Pozyx-processing
-Some files for processing 3.0 that come with the pozyx tutorials
+Some files for processing 3.0 that come with the Pozyx Creator tutorials
 
-More information on https://www.pozyx.io
+More information on https://docs.pozyx.io/creator
 
 ## Installation instructions
 Copy both examples and libraries folder in your Processing sketchbook. Under windows this can be found under My documents/Processing
